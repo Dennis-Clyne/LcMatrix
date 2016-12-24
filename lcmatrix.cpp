@@ -1,4 +1,5 @@
 #include <iostream>
+#include <iomanip>
 #include <vector>
 #include <cmath>
 #include <numeric>
@@ -507,15 +508,17 @@ namespace LcMatrix {
 
         /*
          * 行列の表示
+         * 小数点以下n桁まで表示(デフォルトはn = 5).
          */
-        void Matrix::print() {
+        void Matrix::print(int n) {
                 for (auto i : matrix) {
                         for (double j : i) {
-                                printf("%.15lf, ", j);
-                                //std::cout << j << ", ";
+                                //printf("%.15lf, ", j);
+                                std::cout << std::fixed << std::setprecision(n) << j << ", ";
                         }
                         std::cout << std::endl;
                 }
+                std::cout << std::endl;
         }
 } // namespace
 
@@ -604,7 +607,7 @@ namespace LcMatrix {
         /*
          * print関数
          */
-        void print(Matrix x) {
-                return x.print();
+        void print(Matrix x, int n) {
+                return x.print(n);
         }
 } // namespace

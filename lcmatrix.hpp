@@ -1,5 +1,14 @@
 #include <vector>
 
+// コンパイル時にlcmatrix.cppを一緒にコンパイルしなくてもいいようにする.
+#define INCLUDE_ONLY_HEADER
+
+#ifdef INCLUDE_ONLY_HEADER
+        #ifndef LCMATRIX
+        #define LCMATRIX
+        #endif
+#endif
+
 namespace LcMatrix {
         class Matrix {
                 std::vector<std::vector<double>> matrix;
@@ -34,7 +43,7 @@ namespace LcMatrix {
                 Matrix pow(double);
                 Matrix log();
                 Matrix exp();
-                void print();
+                void print(int n = 5);
         }; // class
 
         double max(Matrix);
@@ -47,5 +56,9 @@ namespace LcMatrix {
         Matrix pow(Matrix, double);
         Matrix log(Matrix);
         Matrix exp(Matrix);
-        void print(Matrix);
+        void print(Matrix, int n = 5);
 } // namespace
+
+#ifdef INCLUDE_ONLY_HEADER
+#include "lcmatrix.cpp"
+#endif
