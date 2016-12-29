@@ -14,8 +14,7 @@ namespace LcMatrix {
                 std::vector<std::vector<double>> matrix;
                 int row, col;
                 void setRC();
-
-                public:
+        public:
                 Matrix();
                 Matrix(std::vector<std::vector<double>>);
                 Matrix(int, int, double x = 0.0);
@@ -29,21 +28,25 @@ namespace LcMatrix {
                 Matrix argMax(bool = true);
                 double sum();
                 Matrix sum(bool);
-                Matrix dot(Matrix);
+                Matrix abs();
+                double ave();
+                Matrix dot(const Matrix&) const;
                 Matrix t();
-                Matrix operator * (Matrix);
-                Matrix operator * (double);
-                Matrix operator + (Matrix);
-                Matrix operator + (double);
-                Matrix operator - (Matrix);
-                Matrix operator - (double);
-                Matrix operator - ();
-                Matrix operator / (Matrix);
-                Matrix operator / (double);
-                Matrix pow(double);
-                Matrix log();
-                Matrix exp();
-                void print(int n = 5);
+                Matrix operator * (const Matrix&) const;
+                Matrix operator * (const double) const;
+                Matrix operator + (const Matrix&) const;
+                Matrix operator + (const double) const;
+                Matrix operator - (const Matrix&) const;
+                Matrix operator - (const double) const;
+                Matrix operator - () const;
+                Matrix operator / (const Matrix&) const;
+                Matrix operator / (const double) const;
+                Matrix operator <= (const Matrix&) const;
+                Matrix operator <= (const double) const;
+                Matrix pow(double) const;
+                Matrix log() const;
+                Matrix exp() const;
+                void print(int n = 5) const;
         }; // class
 
         double max(Matrix);

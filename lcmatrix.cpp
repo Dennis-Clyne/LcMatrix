@@ -10,6 +10,9 @@
 #include "lcmatrix.hpp"
 #endif
 
+/*
+ * Matrix class
+ */
 namespace LcMatrix {
         /*
         std::vector<std::vector<double>> Matrix::matrix;
@@ -100,7 +103,8 @@ namespace LcMatrix {
                 if (x) {
                         Matrix result(row, 1);
                         for (int i = 0; i < row; i++) {
-                                result.set(i, 0, *std::max_element(matrix[i].begin(), matrix[i].end()));
+                                result.matrix[i][0] = *std::max_element(matrix[i].begin(), matrix[i].end());
+                                //result.set(i, 0, *std::max_element(matrix[i].begin(), matrix[i].end()));
                         }
                         return result;
                 } 
@@ -109,8 +113,9 @@ namespace LcMatrix {
                         Matrix result(1, col);
                         for (int i = 0; i < row; i++) {
                                 for (int j = 0; j < col; j++) {
-                                        if (result.get(0, j) < matrix[i][j])
-                                                result.set(0, j, matrix[i][j]);
+                                        if (result.matrix[0][j] < matrix[i][j])
+                                                result.matrix[0][j] = matrix[i][j];
+                                                //result.set(0, j, matrix[i][j]);
                                 }
                         }
                         return result;
@@ -130,7 +135,8 @@ namespace LcMatrix {
                 if (x) {
                         Matrix result(row, 1);
                         for (int i = 0; i < row; i++) {
-                                result.set(i, 0, (int)std::distance(matrix[i].begin(), std::max_element(matrix[i].begin(), matrix[i].end())));
+                                result.matrix[i][0] = (int)std::distance(matrix[i].begin(), std::max_element(matrix[i].begin(), matrix[i].end()));
+                                //result.set(i, 0, (int)std::distance(matrix[i].begin(), std::max_element(matrix[i].begin(), matrix[i].end())));
                         }
                         return result;
                 } 
@@ -139,8 +145,9 @@ namespace LcMatrix {
                         Matrix result(1, col);
                         for (int i = 0; i < row; i++) {
                                 for (int j = 0; j < col; j++) {
-                                        if (result.get(0, j) < matrix[i][j])
-                                                result.set(0, j, i);
+                                        if (result.matrix[0][j] < matrix[i][j])
+                                                result.matrix[0][j] = i;
+                                                //result.set(0, j, i);
                                 }
                         }
                         return result;
@@ -169,7 +176,8 @@ namespace LcMatrix {
                 if (x) {
                         Matrix result(row, 1);
                         for (int i = 0; i < row; i++) {
-                                result.set(i, 0, std::accumulate(matrix[i].begin(), matrix[i].end(), 0.0));
+                                result.matrix[i][0] = std::accumulate(matrix[i].begin(), matrix[i].end(), 0.0);
+                                //result.set(i, 0, std::accumulate(matrix[i].begin(), matrix[i].end(), 0.0));
                         }
                         return result;
                 } 
@@ -178,7 +186,8 @@ namespace LcMatrix {
                         Matrix result(1, col);
                         for (int i = 0; i < row; i++) {
                                 for (int j = 0; j < col; j++) {
-                                        result.set(0, j, result.get(0, j) + matrix[i][j]);
+                                        result.matrix[0][j] = result.matrix[0][j] + matrix[i][j];
+                                        //result.set(0, j, result.get(0, j) + matrix[i][j]);
                                 }
                         }
                         return result;
@@ -186,15 +195,41 @@ namespace LcMatrix {
         }
 
         /*
+         * 行列の要素を絶対値にして返す
+         */
+        Matrix Matrix::abs() {
+                Matrix result(row, col);
+                for (int i = 0; i < row; i++) {
+                        for (int j = 0; j < col; j++) {
+                                if (matrix[i][j] < 0)
+                                        result.matrix[i][j] = -matrix[i][j];
+                                else
+                                        result.matrix[i][j] = matrix[i][j];
+                        }
+                }
+
+                return result;
+        }
+
+        /*
+         * 行列の全要素の平均を返す
+         */
+        double Matrix::ave() {
+                double sum = this->sum();
+                return sum / (row * col);
+        }
+
+        /*
          * 行列の内積
          */
-        Matrix Matrix::dot(Matrix x) {
-                Matrix result(row, x.getCol());
+        Matrix Matrix::dot(const Matrix &x) const {
+                Matrix result(row, x.col);
 
                 for (int i = 0; i < row; i++) {
-                        for (int j = 0; j < x.getCol(); j++) {
+                        for (int j = 0, xcol = x.col; j < xcol; j++) {
                                 for (int z = 0; z < col; z++) {
-                                        result.matrix[i][j] += (matrix[i][z] * x.matrix[z][j]);
+                                        result.matrix[i][j] += matrix[i][z] * x.matrix[z][j];
+                                        //result.matrix[i][j] += (matrix[i][z] * x.matrix[z][j]);
                                 }
                         }
                 }
@@ -210,6 +245,7 @@ namespace LcMatrix {
                 for (int i = 0; i < row; i++) {
                         for (int j = 0; j < col; j++) {
                                 result.matrix[j][i] = matrix[i][j];
+                                //result.matrix[j][i] = matrix[i][j];
                         }
                 }
                 return result;
@@ -218,14 +254,15 @@ namespace LcMatrix {
         /*
          * 行列の要素どうしの掛け算 (行列 * 行列)
          */
-        Matrix Matrix::operator * (Matrix pre_x) {
+        Matrix Matrix::operator * (const Matrix &pre_x) const {
                 Matrix result(row, col);
 
                 // 行と列が同数のとき
-                if (row == pre_x.getRow() && col == pre_x.getCol()) {
+                if (row == pre_x.row && col == pre_x.col) {
                         for (int i = 0; i < row; i++) {
                                 for (int j = 0; j < col; j++) {
                                         result.matrix[i][j] = matrix[i][j] * pre_x.matrix[i][j];
+                                        //result.matrix[i][j] = matrix[i][j] * pre_x.matrix[i][j];
                                 }
                         }
                         return result;
@@ -235,18 +272,20 @@ namespace LcMatrix {
 
                 // numpyのブロードキャストみたいなやつ
                 // 行数同じで列が1つ
-                if (row == pre_x.getRow() && pre_x.getCol() == 1) {
+                if (row == pre_x.row && pre_x.col == 1) {
                         for (int i = 0; i < row; i++) {
                                 for (int j = 0; j < col; j++) {
-                                        x.set(i, j, pre_x.get(i, 0));
+                                        x.matrix[i][j] = pre_x.matrix[i][0];
+                                        //x.set(i, j, pre_x.get(i, 0));
                                 }
                         }
                 }
                 // 列数同じで行が1つ
-                if (col == pre_x.getCol() && pre_x.getRow() == 1) {
+                if (col == pre_x.col && pre_x.row == 1) {
                         for (int i = 0; i < row; i++) {
                                 for (int j = 0; j < col; j++) {
-                                        x.set(i, j, pre_x.get(0, j));
+                                        x.matrix[i][j] = pre_x.matrix[0][j];
+                                        //x.set(i, j, pre_x.get(0, j));
                                 }
                         }
                 }
@@ -263,7 +302,7 @@ namespace LcMatrix {
         /*
          * 行列の各要素とdoubleの掛け算 (行列 * double)
          */
-        Matrix Matrix::operator * (double x) {
+        Matrix Matrix::operator * (const double x) const {
                 Matrix result(row, col);
 
                 for (int i = 0; i < row; i++) {
@@ -279,11 +318,11 @@ namespace LcMatrix {
         /*
          * 行列の和 (行列 + 行列)
          */
-        Matrix Matrix::operator + (Matrix pre_x) {
+        Matrix Matrix::operator + (const Matrix &pre_x) const {
                 Matrix result(row, col);
 
                 // 行と列が同数のとき
-                if (row == pre_x.getRow() && col == pre_x.getCol()) {
+                if (row == pre_x.row && col == pre_x.col) {
                         for (int i = 0; i < row; i++) {
                                 for (int j = 0; j < col; j++) {
                                         result.matrix[i][j] = matrix[i][j] + pre_x.matrix[i][j];
@@ -296,18 +335,20 @@ namespace LcMatrix {
 
                 // numpyのブロードキャストみたいなやつ
                 // 行数同じで列が1つ
-                if (row == pre_x.getRow() && pre_x.getCol() == 1) {
+                if (row == pre_x.row && pre_x.col == 1) {
                         for (int i = 0; i < row; i++) {
                                 for (int j = 0; j < col; j++) {
-                                        x.set(i, j, pre_x.get(i, 0));
+                                        x.matrix[i][j] = pre_x.matrix[i][0];
+                                        //x.set(i, j, pre_x.get(i, 0));
                                 }
                         }
                 }
                 // 列数同じで行が1つ
-                if (col == pre_x.getCol() && pre_x.getRow() == 1) {
+                if (col == pre_x.col && pre_x.row == 1) {
                         for (int i = 0; i < row; i++) {
                                 for (int j = 0; j < col; j++) {
-                                        x.set(i, j, pre_x.get(0, j));
+                                        x.matrix[i][j] =  pre_x.matrix[0][j];
+                                        //x.set(i, j, pre_x.get(0, j));
                                 }
                         }
                 }
@@ -323,7 +364,7 @@ namespace LcMatrix {
         /*
          * 行列の和 (行列 + double)
          */
-        Matrix Matrix::operator + (double x) {
+        Matrix Matrix::operator + (const double x) const {
                 Matrix result(row, col);
 
                 for (int i = 0; i < row; i++) {
@@ -337,11 +378,11 @@ namespace LcMatrix {
         /*
          * 行列の差 (行列 - 行列)
          */
-        Matrix Matrix::operator - (Matrix pre_x) {
+        Matrix Matrix::operator - (const Matrix &pre_x) const {
                 Matrix result(row, col);
 
                 // 行と列が同数のとき
-                if (row == pre_x.getRow() && col == pre_x.getCol()) {
+                if (row == pre_x.row && col == pre_x.col) {
                         for (int i = 0; i < row; i++) {
                                 for (int j = 0; j < col; j++) {
                                         result.matrix[i][j] = matrix[i][j] - pre_x.matrix[i][j];
@@ -354,18 +395,20 @@ namespace LcMatrix {
 
                 // numpyのブロードキャストみたいなやつ
                 // 行数同じで列が1つ
-                if (row == pre_x.getRow() && pre_x.getCol() == 1) {
+                if (row == pre_x.row && pre_x.col == 1) {
                         for (int i = 0; i < row; i++) {
                                 for (int j = 0; j < col; j++) {
-                                        x.set(i, j, pre_x.get(i, 0));
+                                        x.matrix[i][j] = pre_x.matrix[i][0];
+                                        //x.set(i, j, pre_x.get(i, 0));
                                 }
                         }
                 }
                 // 列数同じで行が1つ
-                if (col == pre_x.getCol() && pre_x.getRow() == 1) {
+                if (col == pre_x.col && pre_x.row == 1) {
                         for (int i = 0; i < row; i++) {
                                 for (int j = 0; j < col; j++) {
-                                        x.set(i, j, pre_x.get(0, j));
+                                        x.matrix[i][j] = pre_x.matrix[0][j];
+                                        //x.set(i, j, pre_x.get(0, j));
                                 }
                         }
                 }
@@ -381,7 +424,7 @@ namespace LcMatrix {
         /*
          * 行列の差 (行列 - double)
          */
-        Matrix Matrix::operator - (double x) {
+        Matrix Matrix::operator - (const double x) const {
                 Matrix result(row, col);
 
                 for (int i = 0; i < row; i++) {
@@ -395,7 +438,7 @@ namespace LcMatrix {
         /*
          * 行列の各要素の符号反転
          */
-        Matrix Matrix::operator - () {
+        Matrix Matrix::operator - () const {
                 Matrix result(row, col);
 
                 for (int i = 0; i < row; i++) {
@@ -409,11 +452,11 @@ namespace LcMatrix {
         /*
          * 行列の各要素どうしの割り算 (行列 / 行列)
          */
-        Matrix Matrix::operator / (Matrix pre_x) {
+        Matrix Matrix::operator / (const Matrix &pre_x) const {
                 Matrix result(row, col);
 
                 // 行と列が同数のとき
-                if (row == pre_x.getRow() && col == pre_x.getCol()) {
+                if (row == pre_x.row && col == pre_x.col) {
                         for (int i = 0; i < row; i++) {
                                 for (int j = 0; j < col; j++) {
                                         result.matrix[i][j] = matrix[i][j] / pre_x.matrix[i][j];
@@ -426,18 +469,20 @@ namespace LcMatrix {
 
                 // numpyのブロードキャストみたいなやつ
                 // 行数同じで列が1つ
-                if (row == pre_x.getRow() && pre_x.getCol() == 1) {
+                if (row == pre_x.row && pre_x.col == 1) {
                         for (int i = 0; i < row; i++) {
                                 for (int j = 0; j < col; j++) {
-                                        x.set(i, j, pre_x.get(i, 0));
+                                        x.matrix[i][j] = pre_x.matrix[i][0];
+                                        //x.set(i, j, pre_x.get(i, 0));
                                 }
                         }
                 }
                 // 列数同じで行が1つ
-                if (col == pre_x.getCol() && pre_x.getRow() == 1) {
+                if (col == pre_x.col && pre_x.row == 1) {
                         for (int i = 0; i < row; i++) {
                                 for (int j = 0; j < col; j++) {
-                                        x.set(i, j, pre_x.get(0, j));
+                                        x.matrix[i][j] = pre_x.matrix[0][j];
+                                        //x.set(i, j, pre_x.get(0, j));
                                 }
                         }
                 }
@@ -447,13 +492,14 @@ namespace LcMatrix {
                                 result.matrix[i][j] = matrix[i][j] / x.matrix[i][j];
                         }
                 }
+
                 return result;
         }
 
         /*
          * 行列の割り算 (行列 / double)
          */
-        Matrix Matrix::operator / (double x) {
+        Matrix Matrix::operator / (const double x) const {
                 Matrix result(row, col);
 
                 for (int i = 0; i < row; i++) {
@@ -461,13 +507,49 @@ namespace LcMatrix {
                                 result.matrix[i][j] = matrix[i][j] / x;
                         }
                 }
+
                 return result;
         }
 
         /*
+         * matrixとxの各要素を比較して,
+         * x以下なら1, それ以外は0の行列を返す関数
+         */
+        Matrix Matrix::operator <= (const Matrix &x) const {
+                Matrix result(row, col);
+
+                for (int i = 0; i < row; i++) {
+                        for (int j = 0; j < col; j++) {
+                                if (matrix[i][j] <= x.matrix[i][j])
+                                        result.matrix[i][j] = 1;
+                        }
+                }
+
+                return result;
+        }
+
+        /*
+         * matrixの各要素とxを比較して,
+         * x以下なら1, それ以外は0の行列を返す関数
+         */
+        Matrix Matrix::operator <= (const double x) const {
+                Matrix result(row, col);
+
+                for (int i = 0; i < row; i++) {
+                        for (int j = 0; j < col; j++) {
+                                if (matrix[i][j] <= x)
+                                        result.matrix[i][j] = 1;
+                        }
+                }
+
+                return result;
+        }
+
+
+        /*
          * 行列の各要素のn乗
          */
-        Matrix Matrix::pow(double n) {
+        Matrix Matrix::pow(double n) const {
                 Matrix result(row, col);
 
                 for (int i = 0; i < row; i++) {
@@ -481,7 +563,7 @@ namespace LcMatrix {
         /*
          * 行列の各要素のlog() (自然対数)
          */
-        Matrix Matrix::log() {
+        Matrix Matrix::log() const {
                 Matrix result(row, col);
 
                 for (int i = 0; i < row; i++) {
@@ -495,7 +577,7 @@ namespace LcMatrix {
         /*
          * 行列の各要素のexp()
          */
-        Matrix Matrix::exp() {
+        Matrix Matrix::exp() const {
                 Matrix result(row, col);
 
                 for (int i = 0; i < row; i++) {
@@ -510,7 +592,7 @@ namespace LcMatrix {
          * 行列の表示
          * 小数点以下n桁まで表示(デフォルトはn = 5).
          */
-        void Matrix::print(int n) {
+        void Matrix::print(int n) const {
                 for (auto i : matrix) {
                         for (double j : i) {
                                 //printf("%.15lf, ", j);
@@ -520,7 +602,7 @@ namespace LcMatrix {
                 }
                 std::cout << std::endl;
         }
-} // namespace
+} // namespace Matrix class
 
 namespace LcMatrix {
         /*
