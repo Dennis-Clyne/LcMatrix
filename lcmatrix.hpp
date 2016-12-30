@@ -11,16 +11,17 @@
 
 namespace LcMatrix {
         class Matrix {
-                std::vector<std::vector<double>> matrix;
+                std::vector<double> matrix;
+                int size;
                 int row, col;
-                void setRC();
         public:
                 Matrix();
                 Matrix(std::vector<std::vector<double>>);
-                Matrix(int, int, double x = 0.0);
+                Matrix(int, int);
+                Matrix(int, int, double x);
                 double get(int, int);
                 void set(int, int, double);
-                std::vector<std::vector<double>> getMatrix();
+                std::vector<double> getMatrix();
                 int getRow();
                 int getCol();
                 double max();

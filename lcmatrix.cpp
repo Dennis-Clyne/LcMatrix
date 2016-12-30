@@ -15,53 +15,66 @@
  */
 namespace LcMatrix {
         /*
-        std::vector<std::vector<double>> Matrix::matrix;
-        double Matrix::row, Matrix::col;
-        */
-
-        void Matrix::setRC() {
-                row = matrix.size();
-                col = matrix[0].size();
-        }
-
-        /*
          * 宣言だけするとき
          */
         Matrix::Matrix() {
         }
 
         /*
-         * 2次元vectorの行列のmatrixを作る
+         * 行列受け取ってmatrixを作る
          */
         Matrix::Matrix(std::vector<std::vector<double>> x) {
-                matrix = x;
-                setRC();
+                row = x.size();
+                col = x[0].size();
+                size = row * col;
+                matrix.reserve(size);
+
+                for (auto i : x) {
+                        for (double j : i) {
+                                matrix.push_back(j);
+                        }
+                }
+        }
+
+        /*
+         * i行j列のmatrixを要素分だけメモリ確保して作る
+         */
+        Matrix::Matrix(int i, int j) {
+                row = i;
+                col = j;
+                size = row * col;
+                matrix.reserve(size);
         }
 
         /*
          * i行j列のmatrixをxで初期化して作る
-         * xはデフォルト引数でその値は0.0
          */
         Matrix::Matrix(int i, int j, double x) {
-                matrix = std::vector<std::vector<double>>(i, std::vector<double>(j, x));
-                setRC();
+                matrix = std::vector<double>(i * j, x);
+                row = i;
+                col = j;
+                size = row * col;
         }
 
         /*
-         * matrix[i][j]を返す
+         * matrixのi行j列目の要素を返す
+         * idnexは0から
          */
         double Matrix::get(int i, int j) {
-                return matrix[i][j];
+                return matrix[col * i + j];
         }
 
+        /*
+         * matrixのi行j列目にxを代入する
+         */
         void Matrix::set(int i, int j, double x) {
-                matrix[i][j] = x;
+                matrix[col * i + j] = x;
         }
 
         /*
          * matrix自体を返す
          */
-        std::vector<std::vector<double>> Matrix::getMatrix() {
+        std::vector<double> Matrix::getMatrix() {
                 return matrix;
         }
 
@@ -81,43 +94,47 @@ namespace LcMatrix {
 
         /*
          * max関数
-         * 行列内で最も大きな値を返す
+         * matrixで最も大きな値を返す
          */
         double Matrix::max() {
-                std::vector<double> max_vec;
-                for (auto i : matrix) {
-                        max_vec.push_back(*std::max_element(i.begin(), i.end()));
-                }
-
-                return *std::max_element(max_vec.begin(), max_vec.end());
+                return *std::max_element(std::begin(matrix), std::end(matrix));
         }
 
         /*
          * max関数(bool)
-         * 行または列内で最大の要素を行列として返す.
+         * 行または列内で最大の要素をMatrixオブジェクトとして返す.
          * true : 行
          * false : 列
          */
         Matrix Matrix::max(bool x) {
+                auto ite = std::begin(matrix);
+                auto end = std::end(matrix);
+
                 // 行方向
                 if (x) {
                         Matrix result(row, 1);
-                        for (int i = 0; i < row; i++) {
-                                result.matrix[i][0] = *std::max_element(matrix[i].begin(), matrix[i].end());
+                        for (; ite != end; ite += col) {
+                                result.matrix.push_back(*std::max_element(ite, ite + col));
                                 //result.set(i, 0, *std::max_element(matrix[i].begin(), matrix[i].end()));
                         }
+
                         return result;
                 } 
                 // 列方向
                 else {
-                        Matrix result(1, col);
-                        for (int i = 0; i < row; i++) {
-                                for (int j = 0; j < col; j++) {
-                                        if (result.matrix[0][j] < matrix[i][j])
-                                                result.matrix[0][j] = matrix[i][j];
-                                                //result.set(0, j, matrix[i][j]);
-                                }
+                        Matrix result(1, col, 0);
+                        auto r_ite = std::begin(result.matrix);
+                        auto r_end = std::end(result.matrix);
+                        auto r_ite_st = r_ite; // r_iteをとっとく
+
+                        for (; ite != end; ite++, r_ite++) {
+                                if (r_ite == r_end - 1)
+                                        r_ite = r_ite_st;
+
+                                if (*r_ite < *ite)
+                                        *r_ite = *ite;
                         }
+
                         return result;
                 }
         }
@@ -131,25 +148,44 @@ namespace LcMatrix {
          * デフォルトは行.
          */
         Matrix Matrix::argMax(bool x) {
+                auto ite = std::begin(matrix);
+                auto end = std::end(matrix);
                 // 行方向
                 if (x) {
                         Matrix result(row, 1);
-                        for (int i = 0; i < row; i++) {
-                                result.matrix[i][0] = (int)std::distance(matrix[i].begin(), std::max_element(matrix[i].begin(), matrix[i].end()));
+                        for (; ite != end; ite += col) {
+                                result.matrix.push_back((int)std::distance(ite, std::max_element(ite, ite + col)));
                                 //result.set(i, 0, (int)std::distance(matrix[i].begin(), std::max_element(matrix[i].begin(), matrix[i].end())));
                         }
+
                         return result;
                 } 
                 // 列方向
                 else {
-                        Matrix result(1, col);
-                        for (int i = 0; i < row; i++) {
-                                for (int j = 0; j < col; j++) {
-                                        if (result.matrix[0][j] < matrix[i][j])
-                                                result.matrix[0][j] = i;
-                                                //result.set(0, j, i);
+                        Matrix result(1, col, 0);
+                        auto r_ite = std::begin(result.matrix);
+                        auto r_end = std::end(result.matrix);
+                        auto r_ite_st = r_ite; // r_iteをとっとく
+
+                        Matrix max_mat(1, col, 0); // 最大値とっとく用
+                        auto m_ite = std::begin(max_mat.matrix);
+                        auto m_end = std::end(max_mat.matrix);
+                        auto m_ite_st = m_ite; // m_iteをとっとく
+
+                        int count = 0;
+                        for (; ite != end; ite++, m_ite++, r_ite++) {
+                                if (m_ite == m_end) {
+                                        m_ite = m_ite_st;
+                                        r_ite = r_ite_st;
+                                        count++;
+                                }
+
+                                if (*m_ite < *ite) {
+                                        *m_ite = *ite;
+                                        *r_ite = count;
                                 }
                         }
+
                         return result;
                 }
         }
@@ -159,10 +195,7 @@ namespace LcMatrix {
          * 行列の全要素の和
          */
         double Matrix::sum() {
-                double sum = 0;
-                for (auto i : matrix) {
-                        sum += std::accumulate(i.begin(), i.end(), 0.0);
-                }
+                double sum = std::accumulate(std::begin(matrix), std::end(matrix), 0.0);
                 return sum;
         }
 
@@ -172,24 +205,31 @@ namespace LcMatrix {
          * false : 列方向
          */
         Matrix Matrix::sum(bool x) {
+                auto ite = std::begin(matrix);
+                auto end = std::end(matrix);
                 // 行方向
                 if (x) {
                         Matrix result(row, 1);
-                        for (int i = 0; i < row; i++) {
-                                result.matrix[i][0] = std::accumulate(matrix[i].begin(), matrix[i].end(), 0.0);
-                                //result.set(i, 0, std::accumulate(matrix[i].begin(), matrix[i].end(), 0.0));
+                        for (; ite != end; ite += col) {
+                                result.matrix.push_back(std::accumulate(ite, ite + col, 0.0));
                         }
+
                         return result;
                 } 
                 // 列方向
                 else {
-                        Matrix result(1, col);
-                        for (int i = 0; i < row; i++) {
-                                for (int j = 0; j < col; j++) {
-                                        result.matrix[0][j] = result.matrix[0][j] + matrix[i][j];
-                                        //result.set(0, j, result.get(0, j) + matrix[i][j]);
-                                }
+                        Matrix result(1, col, 0);
+                        auto r_ite = std::begin(result.matrix);
+                        auto r_end = std::end(result.matrix);
+                        auto r_ite_st = r_ite; // r_iteをとっとく
+
+                        for (; ite != end; ite++, r_ite++) {
+                                if (r_ite == r_end)
+                                        r_ite = r_ite_st;
+
+                                *r_ite += *ite;
                         }
+
                         return result;
                 }
         }
@@ -199,13 +239,11 @@ namespace LcMatrix {
          */
         Matrix Matrix::abs() {
                 Matrix result(row, col);
-                for (int i = 0; i < row; i++) {
-                        for (int j = 0; j < col; j++) {
-                                if (matrix[i][j] < 0)
-                                        result.matrix[i][j] = -matrix[i][j];
-                                else
-                                        result.matrix[i][j] = matrix[i][j];
-                        }
+                for (double i : matrix) {
+                        if (i < 0)
+                                result.matrix.push_back(-i);
+                        else
+                                result.matrix.push_back(i);
                 }
 
                 return result;
@@ -216,21 +254,25 @@ namespace LcMatrix {
          */
         double Matrix::ave() {
                 double sum = this->sum();
-                return sum / (row * col);
+                return sum / size;
         }
 
         /*
          * 行列の内積
          */
         Matrix Matrix::dot(const Matrix &x) const {
-                Matrix result(row, x.col);
+                int xcol = x.col;
+                Matrix result(row, xcol);
 
+                double ans = 0;
                 for (int i = 0; i < row; i++) {
-                        for (int j = 0, xcol = x.col; j < xcol; j++) {
+                        for (int j = 0; j < xcol; j++) {
                                 for (int z = 0; z < col; z++) {
-                                        result.matrix[i][j] += matrix[i][z] * x.matrix[z][j];
-                                        //result.matrix[i][j] += (matrix[i][z] * x.matrix[z][j]);
+                                        ans += matrix[col * i + z] * x.matrix[xcol * z + j];
+                                        //result.matrix[i][j] += matrix[i][z] * x.matrix[z][j];
                                 }
+                                result.matrix.push_back(ans);
+                                ans = 0;
                         }
                 }
 
@@ -242,9 +284,11 @@ namespace LcMatrix {
          */
         Matrix Matrix::t() {
                 Matrix result(col, row);
-                for (int i = 0; i < row; i++) {
-                        for (int j = 0; j < col; j++) {
-                                result.matrix[j][i] = matrix[i][j];
+                auto ite = std::begin(matrix);
+                auto end = ite + col; // 1行目の終わりまで
+                for (; ite !=end; ite++) {
+                        for (int i = 0; i < row; i++) {
+                                result.matrix.push_back(*(ite + col * i));
                                 //result.matrix[j][i] = matrix[i][j];
                         }
                 }
@@ -257,13 +301,15 @@ namespace LcMatrix {
         Matrix Matrix::operator * (const Matrix &pre_x) const {
                 Matrix result(row, col);
 
+                auto ite = std::begin(matrix);
+                auto end = std::end(matrix);
+                auto pre_x_ite = std::begin(pre_x.matrix);
+                auto pre_x_end = std::end(pre_x.matrix);
+
                 // 行と列が同数のとき
                 if (row == pre_x.row && col == pre_x.col) {
-                        for (int i = 0; i < row; i++) {
-                                for (int j = 0; j < col; j++) {
-                                        result.matrix[i][j] = matrix[i][j] * pre_x.matrix[i][j];
-                                        //result.matrix[i][j] = matrix[i][j] * pre_x.matrix[i][j];
-                                }
+                        for (; ite != end; ite++, pre_x_ite++) {
+                                result.matrix.push_back(*ite * *pre_x_ite);
                         }
                         return result;
                 }
@@ -272,27 +318,23 @@ namespace LcMatrix {
 
                 // numpyのブロードキャストみたいなやつ
                 // 行数同じで列が1つ
+                auto pre_x_ite_str = pre_x_ite;
                 if (row == pre_x.row && pre_x.col == 1) {
-                        for (int i = 0; i < row; i++) {
-                                for (int j = 0; j < col; j++) {
-                                        x.matrix[i][j] = pre_x.matrix[i][0];
-                                        //x.set(i, j, pre_x.get(i, 0));
-                                }
+                        for (; ite != end; ite++, pre_x_ite++) {
+                                if (pre_x_ite == pre_x_end - 1)
+                                        pre_x_ite = pre_x_ite_str;
+                                result.matrix.push_back(*ite * *pre_x_ite);
                         }
                 }
                 // 列数同じで行が1つ
                 if (col == pre_x.col && pre_x.row == 1) {
-                        for (int i = 0; i < row; i++) {
-                                for (int j = 0; j < col; j++) {
-                                        x.matrix[i][j] = pre_x.matrix[0][j];
-                                        //x.set(i, j, pre_x.get(0, j));
+                        int count = 0;
+                        for (; ite != end; ite++, count++) {
+                                if (count == row - 1) {
+                                        pre_x_ite++;
+                                        count = 0;
                                 }
-                        }
-                }
-
-                for (int i = 0; i < row; i++) {
-                        for (int j = 0; j < col; j++) {
-                                result.matrix[i][j] = matrix[i][j] * x.matrix[i][j];
+                                result.matrix.push_back(*ite * *pre_x_ite);
                         }
                 }
 
@@ -305,15 +347,12 @@ namespace LcMatrix {
         Matrix Matrix::operator * (const double x) const {
                 Matrix result(row, col);
 
-                for (int i = 0; i < row; i++) {
-                        for (int j = 0; j < col; j++) {
-                                result.matrix[i][j] = matrix[i][j] * x;
-                        }
+                for (double i : matrix) {
+                        result.matrix.push_back(i * x);
                 }
 
                 return result;
         }
-
 
         /*
          * 行列の和 (行列 + 行列)
@@ -321,12 +360,15 @@ namespace LcMatrix {
         Matrix Matrix::operator + (const Matrix &pre_x) const {
                 Matrix result(row, col);
 
+                auto ite = std::begin(matrix);
+                auto end = std::end(matrix);
+                auto pre_x_ite = std::begin(pre_x.matrix);
+                auto pre_x_end = std::end(pre_x.matrix);
+
                 // 行と列が同数のとき
                 if (row == pre_x.row && col == pre_x.col) {
-                        for (int i = 0; i < row; i++) {
-                                for (int j = 0; j < col; j++) {
-                                        result.matrix[i][j] = matrix[i][j] + pre_x.matrix[i][j];
-                                }
+                        for (; ite != end; ite++, pre_x_ite++) {
+                                result.matrix.push_back(*ite + *pre_x_ite);
                         }
                         return result;
                 }
@@ -335,29 +377,26 @@ namespace LcMatrix {
 
                 // numpyのブロードキャストみたいなやつ
                 // 行数同じで列が1つ
+                auto pre_x_ite_str = pre_x_ite;
                 if (row == pre_x.row && pre_x.col == 1) {
-                        for (int i = 0; i < row; i++) {
-                                for (int j = 0; j < col; j++) {
-                                        x.matrix[i][j] = pre_x.matrix[i][0];
-                                        //x.set(i, j, pre_x.get(i, 0));
-                                }
+                        for (; ite != end; ite++, pre_x_ite++) {
+                                if (pre_x_ite == pre_x_end - 1)
+                                        pre_x_ite = pre_x_ite_str;
+                                result.matrix.push_back(*ite + *pre_x_ite);
                         }
                 }
                 // 列数同じで行が1つ
                 if (col == pre_x.col && pre_x.row == 1) {
-                        for (int i = 0; i < row; i++) {
-                                for (int j = 0; j < col; j++) {
-                                        x.matrix[i][j] =  pre_x.matrix[0][j];
-                                        //x.set(i, j, pre_x.get(0, j));
+                        int count = 0;
+                        for (; ite != end; ite++, count++) {
+                                if (count == row - 1) {
+                                        pre_x_ite++;
+                                        count = 0;
                                 }
+                                result.matrix.push_back(*ite + *pre_x_ite);
                         }
                 }
 
-                for (int i = 0; i < row; i++) {
-                        for (int j = 0; j < col; j++) {
-                                result.matrix[i][j] = matrix[i][j] + x.matrix[i][j];
-                        }
-                }
                 return result;
         }
 
@@ -367,11 +406,10 @@ namespace LcMatrix {
         Matrix Matrix::operator + (const double x) const {
                 Matrix result(row, col);
 
-                for (int i = 0; i < row; i++) {
-                        for (int j = 0; j < col; j++) {
-                                result.matrix[i][j] = matrix[i][j] + x;
-                        }
+                for (double i : matrix) {
+                        result.matrix.push_back(i + x);
                 }
+
                 return result;
         }
 
@@ -381,12 +419,15 @@ namespace LcMatrix {
         Matrix Matrix::operator - (const Matrix &pre_x) const {
                 Matrix result(row, col);
 
+                auto ite = std::begin(matrix);
+                auto end = std::end(matrix);
+                auto pre_x_ite = std::begin(pre_x.matrix);
+                auto pre_x_end = std::end(pre_x.matrix);
+
                 // 行と列が同数のとき
                 if (row == pre_x.row && col == pre_x.col) {
-                        for (int i = 0; i < row; i++) {
-                                for (int j = 0; j < col; j++) {
-                                        result.matrix[i][j] = matrix[i][j] - pre_x.matrix[i][j];
-                                }
+                        for (; ite != end; ite++, pre_x_ite++) {
+                                result.matrix.push_back(*ite - *pre_x_ite);
                         }
                         return result;
                 }
@@ -395,29 +436,26 @@ namespace LcMatrix {
 
                 // numpyのブロードキャストみたいなやつ
                 // 行数同じで列が1つ
+                auto pre_x_ite_str = pre_x_ite;
                 if (row == pre_x.row && pre_x.col == 1) {
-                        for (int i = 0; i < row; i++) {
-                                for (int j = 0; j < col; j++) {
-                                        x.matrix[i][j] = pre_x.matrix[i][0];
-                                        //x.set(i, j, pre_x.get(i, 0));
-                                }
+                        for (; ite != end; ite++, pre_x_ite++) {
+                                if (pre_x_ite == pre_x_end - 1)
+                                        pre_x_ite = pre_x_ite_str;
+                                result.matrix.push_back(*ite - *pre_x_ite);
                         }
                 }
                 // 列数同じで行が1つ
                 if (col == pre_x.col && pre_x.row == 1) {
-                        for (int i = 0; i < row; i++) {
-                                for (int j = 0; j < col; j++) {
-                                        x.matrix[i][j] = pre_x.matrix[0][j];
-                                        //x.set(i, j, pre_x.get(0, j));
+                        int count = 0;
+                        for (; ite != end; ite++, count++) {
+                                if (count == row - 1) {
+                                        pre_x_ite++;
+                                        count = 0;
                                 }
+                                result.matrix.push_back(*ite - *pre_x_ite);
                         }
                 }
 
-                for (int i = 0; i < row; i++) {
-                        for (int j = 0; j < col; j++) {
-                                result.matrix[i][j] = matrix[i][j] - x.matrix[i][j];
-                        }
-                }
                 return result;
         }
 
@@ -427,11 +465,10 @@ namespace LcMatrix {
         Matrix Matrix::operator - (const double x) const {
                 Matrix result(row, col);
 
-                for (int i = 0; i < row; i++) {
-                        for (int j = 0; j < col; j++) {
-                                result.matrix[i][j] = matrix[i][j] - x;
-                        }
+                for (double i : matrix) {
+                        result.matrix.push_back(i - x);
                 }
+
                 return result;
         }
 
@@ -441,11 +478,10 @@ namespace LcMatrix {
         Matrix Matrix::operator - () const {
                 Matrix result(row, col);
 
-                for (int i = 0; i < row; i++) {
-                        for (int j = 0; j < col; j++) {
-                                result.matrix[i][j] = -matrix[i][j];
-                        }
+                for (double i : matrix) {
+                        result.matrix.push_back(-i);
                 }
+
                 return result;
         }
 
@@ -455,12 +491,15 @@ namespace LcMatrix {
         Matrix Matrix::operator / (const Matrix &pre_x) const {
                 Matrix result(row, col);
 
+                auto ite = std::begin(matrix);
+                auto end = std::end(matrix);
+                auto pre_x_ite = std::begin(pre_x.matrix);
+                auto pre_x_end = std::end(pre_x.matrix);
+
                 // 行と列が同数のとき
                 if (row == pre_x.row && col == pre_x.col) {
-                        for (int i = 0; i < row; i++) {
-                                for (int j = 0; j < col; j++) {
-                                        result.matrix[i][j] = matrix[i][j] / pre_x.matrix[i][j];
-                                }
+                        for (; ite != end; ite++, pre_x_ite++) {
+                                result.matrix.push_back(*ite / *pre_x_ite);
                         }
                         return result;
                 }
@@ -469,27 +508,23 @@ namespace LcMatrix {
 
                 // numpyのブロードキャストみたいなやつ
                 // 行数同じで列が1つ
+                auto pre_x_ite_str = pre_x_ite;
                 if (row == pre_x.row && pre_x.col == 1) {
-                        for (int i = 0; i < row; i++) {
-                                for (int j = 0; j < col; j++) {
-                                        x.matrix[i][j] = pre_x.matrix[i][0];
-                                        //x.set(i, j, pre_x.get(i, 0));
-                                }
+                        for (; ite != end; ite++, pre_x_ite++) {
+                                if (pre_x_ite == pre_x_end - 1)
+                                        pre_x_ite = pre_x_ite_str;
+                                result.matrix.push_back(*ite / *pre_x_ite);
                         }
                 }
                 // 列数同じで行が1つ
                 if (col == pre_x.col && pre_x.row == 1) {
-                        for (int i = 0; i < row; i++) {
-                                for (int j = 0; j < col; j++) {
-                                        x.matrix[i][j] = pre_x.matrix[0][j];
-                                        //x.set(i, j, pre_x.get(0, j));
+                        int count = 0;
+                        for (; ite != end; ite++, count++) {
+                                if (count == row - 1) {
+                                        pre_x_ite++;
+                                        count = 0;
                                 }
-                        }
-                }
-
-                for (int i = 0; i < row; i++) {
-                        for (int j = 0; j < col; j++) {
-                                result.matrix[i][j] = matrix[i][j] / x.matrix[i][j];
+                                result.matrix.push_back(*ite / *pre_x_ite);
                         }
                 }
 
@@ -502,10 +537,8 @@ namespace LcMatrix {
         Matrix Matrix::operator / (const double x) const {
                 Matrix result(row, col);
 
-                for (int i = 0; i < row; i++) {
-                        for (int j = 0; j < col; j++) {
-                                result.matrix[i][j] = matrix[i][j] / x;
-                        }
+                for (double i : matrix) {
+                        result.matrix.push_back(i / x);
                 }
 
                 return result;
@@ -515,36 +548,23 @@ namespace LcMatrix {
          * matrixとxの各要素を比較して,
          * x以下なら1, それ以外は0の行列を返す関数
          */
-        Matrix Matrix::operator <= (const Matrix &x) const {
+        Matrix Matrix::operator <= (const Matrix &pre_x) const {
                 Matrix result(row, col);
 
-                for (int i = 0; i < row; i++) {
-                        for (int j = 0; j < col; j++) {
-                                if (matrix[i][j] <= x.matrix[i][j])
-                                        result.matrix[i][j] = 1;
-                        }
+                auto ite = std::begin(matrix);
+                auto end = std::end(matrix);
+                auto pre_x_ite = std::begin(pre_x.matrix);
+
+                // 行と列が同数のとき
+                for (; ite != end; ite++, pre_x_ite++) {
+                        if (*ite <= *pre_x_ite)
+                                result.matrix.push_back(1);
+                        else 
+                                result.matrix.push_back(0);
                 }
 
                 return result;
         }
-
-        /*
-         * matrixの各要素とxを比較して,
-         * x以下なら1, それ以外は0の行列を返す関数
-         */
-        Matrix Matrix::operator <= (const double x) const {
-                Matrix result(row, col);
-
-                for (int i = 0; i < row; i++) {
-                        for (int j = 0; j < col; j++) {
-                                if (matrix[i][j] <= x)
-                                        result.matrix[i][j] = 1;
-                        }
-                }
-
-                return result;
-        }
-
 
         /*
          * 行列の各要素のn乗
@@ -552,11 +572,10 @@ namespace LcMatrix {
         Matrix Matrix::pow(double n) const {
                 Matrix result(row, col);
 
-                for (int i = 0; i < row; i++) {
-                        for (int j = 0; j < col; j++) {
-                                result.matrix[i][j] = std::pow(matrix[i][j], n);
-                        }
+                for (double i : matrix) {
+                        result.matrix.push_back(std::pow(i, n));
                 }
+
                 return result;
         }
 
@@ -566,11 +585,10 @@ namespace LcMatrix {
         Matrix Matrix::log() const {
                 Matrix result(row, col);
 
-                for (int i = 0; i < row; i++) {
-                        for (int j = 0; j < col; j++) {
-                                result.matrix[i][j] = std::log(matrix[i][j]);
-                        }
+                for (double i : matrix) {
+                        result.matrix.push_back(std::log(i));
                 }
+
                 return result;
         }
 
@@ -580,11 +598,10 @@ namespace LcMatrix {
         Matrix Matrix::exp() const {
                 Matrix result(row, col);
 
-                for (int i = 0; i < row; i++) {
-                        for (int j = 0; j < col; j++) {
-                                result.matrix[i][j] = std::exp(matrix[i][j]);
-                        }
+                for (double i : matrix) {
+                        result.matrix.push_back(std::exp(i));
                 }
+
                 return result;
         }
 
@@ -593,10 +610,10 @@ namespace LcMatrix {
          * 小数点以下n桁まで表示(デフォルトはn = 5).
          */
         void Matrix::print(int n) const {
-                for (auto i : matrix) {
-                        for (double j : i) {
+                for (int i = 0; i < row; i++) {
+                        for (int j = 0; j < col; j++) {
                                 //printf("%.15lf, ", j);
-                                std::cout << std::fixed << std::setprecision(n) << j << ", ";
+                                std::cout << std::fixed << std::setprecision(n) << matrix[col * i + j] << ", ";
                         }
                         std::cout << std::endl;
                 }
