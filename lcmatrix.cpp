@@ -15,6 +15,21 @@
  */
 namespace LcMatrix {
         /*
+         * matrixを正規分布で初期化する
+         */
+        void random() {
+                std::random_device rnd;
+                std::mt19937_64 mt(rnd());
+                // 平均0.0, 分散値1.0の正規分布
+                std::normal_distribution<> norm(0.0, 1.0);
+
+                matrix.clear();
+                for (int i = 0; i < size; i++) {
+                        matrix.push_back(norm(mt));
+                }
+        }
+
+        /*
          * 宣言だけするとき
          */
         Matrix::Matrix() {
@@ -558,6 +573,27 @@ namespace LcMatrix {
                 // 行と列が同数のとき
                 for (; ite != end; ite++, pre_x_ite++) {
                         if (*ite <= *pre_x_ite)
+                                result.matrix.push_back(1);
+                        else 
+                                result.matrix.push_back(0);
+                }
+
+                return result;
+        }
+
+        /*
+         * matrixとxを比較して,
+         * x以下なら1, それ以外は0の行列を返す関数
+         */
+        Matrix Matrix::operator <= (const double x) const {
+                Matrix result(row, col);
+
+                auto ite = std::begin(matrix);
+                auto end = std::end(matrix);
+
+                // 行と列が同数のとき
+                for (double i : matrix) {
+                        if (i <= x)
                                 result.matrix.push_back(1);
                         else 
                                 result.matrix.push_back(0);

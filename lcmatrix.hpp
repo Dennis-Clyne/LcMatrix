@@ -14,6 +14,8 @@ namespace LcMatrix {
                 std::vector<double> matrix;
                 int size;
                 int row, col;
+
+                void random_init();
         public:
                 Matrix();
                 Matrix(std::vector<std::vector<double>>);
