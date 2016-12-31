@@ -17,7 +17,7 @@ namespace LcMatrix {
         /*
          * matrixを正規分布で初期化する
          */
-        void random() {
+        void randomInit() {
                 std::random_device rnd;
                 std::mt19937_64 mt(rnd());
                 // 平均0.0, 分散値1.0の正規分布
