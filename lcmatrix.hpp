@@ -15,12 +15,12 @@ namespace LcMatrix {
                 int size;
                 int row, col;
 
-                void initRand();
         public:
                 Matrix();
                 Matrix(std::vector<std::vector<double>>);
                 Matrix(int, int);
                 Matrix(int, int, double x);
+                void initRand();
                 double get(int, int);
                 void set(int, int, double);
                 std::vector<double> getMatrix();
@@ -48,6 +48,8 @@ namespace LcMatrix {
                 Matrix operator / (const double) const;
                 Matrix operator == (const Matrix&) const;
                 Matrix operator == (const double) const;
+                Matrix operator > (const Matrix&) const;
+                Matrix operator > (const double) const;
                 Matrix operator <= (const Matrix&) const;
                 Matrix operator <= (const double) const;
                 Matrix pow(double) const;

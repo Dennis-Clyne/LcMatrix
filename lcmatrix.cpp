@@ -615,6 +615,47 @@ namespace LcMatrix {
                 return result;
         }
 
+        /*
+         * matrixとpre_xの各要素を比較して,
+         * xより大きいなら1, それ以外は0の行列を返す関数
+         */
+        Matrix Matrix::operator > (const Matrix &pre_x) const {
+                Matrix result(row, col);
+
+                auto ite = std::begin(matrix);
+                auto end = std::end(matrix);
+                auto pre_x_ite = std::begin(pre_x.matrix);
+
+                // 行と列が同数のとき
+                for (; ite != end; ite++, pre_x_ite++) {
+                        if (*ite > *pre_x_ite)
+                                result.matrix.push_back(1);
+                        else 
+                                result.matrix.push_back(0);
+                }
+
+                return result;
+        }
+
+        /*
+         * matrixとxを比較して,
+         * xより大きいなら1, それ以外は0の行列を返す関数
+         */
+        Matrix Matrix::operator > (const double x) const {
+                Matrix result(row, col);
+
+                // 行と列が同数のとき
+                for (double i : matrix) {
+                        if (i > x)
+                                result.matrix.push_back(1);
+                        else 
+                                result.matrix.push_back(0);
+                }
+
+                return result;
+        }
+
+
 
         /*
          * matrixとpre_xの各要素を比較して,
