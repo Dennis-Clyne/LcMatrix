@@ -250,6 +250,15 @@ namespace LcMatrix {
         }
 
         /*
+         * matrixに含まれるxの数を返す関数
+         */
+        int Matrix::count(double x) {
+                auto ite = std::begin(matrix);
+                auto end = std::end(matrix);
+                return std::count(ite, end, x);
+        }
+
+        /*
          * 行列の要素を絶対値にして返す
          */
         Matrix Matrix::abs() {

@@ -31,6 +31,7 @@ namespace LcMatrix {
                 Matrix argMax(bool = true);
                 double sum();
                 Matrix sum(bool);
+                int count(double);
                 Matrix abs();
                 double ave();
                 Matrix dot(const Matrix&) const;
