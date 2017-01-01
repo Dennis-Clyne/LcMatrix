@@ -15,7 +15,7 @@ namespace LcMatrix {
                 int size;
                 int row, col;
 
-                void randomInit();
+                void initRand();
         public:
                 Matrix();
                 Matrix(std::vector<std::vector<double>>);
@@ -37,6 +37,7 @@ namespace LcMatrix {
                 Matrix t();
                 Matrix operator * (const Matrix&) const;
                 Matrix operator * (const double) const;
+                void operator *= (const double);
                 Matrix operator + (const Matrix&) const;
                 Matrix operator + (const double) const;
                 Matrix operator - (const Matrix&) const;
@@ -44,6 +45,8 @@ namespace LcMatrix {
                 Matrix operator - () const;
                 Matrix operator / (const Matrix&) const;
                 Matrix operator / (const double) const;
+                Matrix operator == (const Matrix&) const;
+                Matrix operator == (const double) const;
                 Matrix operator <= (const Matrix&) const;
                 Matrix operator <= (const double) const;
                 Matrix pow(double) const;

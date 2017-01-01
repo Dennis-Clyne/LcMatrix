@@ -17,7 +17,7 @@ namespace LcMatrix {
         /*
          * matrixを正規分布で初期化する
          */
-        void randomInit() {
+        void Matrix::initRand() {
                 std::random_device rnd;
                 std::mt19937_64 mt(rnd());
                 // 平均0.0, 分散値1.0の正規分布
@@ -319,7 +319,6 @@ namespace LcMatrix {
                 auto ite = std::begin(matrix);
                 auto end = std::end(matrix);
                 auto pre_x_ite = std::begin(pre_x.matrix);
-                auto pre_x_end = std::end(pre_x.matrix);
 
                 // 行と列が同数のとき
                 if (row == pre_x.row && col == pre_x.col) {
@@ -329,7 +328,7 @@ namespace LcMatrix {
                         return result;
                 }
 
-                Matrix x(row, col);
+                auto pre_x_end = std::end(pre_x.matrix);
 
                 // numpyのブロードキャストみたいなやつ
                 // 行数同じで列が1つ
@@ -370,6 +369,17 @@ namespace LcMatrix {
         }
 
         /*
+         * 行列の各要素をx倍する.
+         */
+        void Matrix::operator *= (const double x) {
+                auto ite = std::begin(matrix);
+                auto end = std::end(matrix);
+                for (; ite != end; ite++) {
+                        *ite *= x;
+                }
+        }
+
+        /*
          * 行列の和 (行列 + 行列)
          */
         Matrix Matrix::operator + (const Matrix &pre_x) const {
@@ -378,7 +388,6 @@ namespace LcMatrix {
                 auto ite = std::begin(matrix);
                 auto end = std::end(matrix);
                 auto pre_x_ite = std::begin(pre_x.matrix);
-                auto pre_x_end = std::end(pre_x.matrix);
 
                 // 行と列が同数のとき
                 if (row == pre_x.row && col == pre_x.col) {
@@ -388,7 +397,7 @@ namespace LcMatrix {
                         return result;
                 }
 
-                Matrix x(row, col);
+                auto pre_x_end = std::end(pre_x.matrix);
 
                 // numpyのブロードキャストみたいなやつ
                 // 行数同じで列が1つ
@@ -437,7 +446,6 @@ namespace LcMatrix {
                 auto ite = std::begin(matrix);
                 auto end = std::end(matrix);
                 auto pre_x_ite = std::begin(pre_x.matrix);
-                auto pre_x_end = std::end(pre_x.matrix);
 
                 // 行と列が同数のとき
                 if (row == pre_x.row && col == pre_x.col) {
@@ -447,7 +455,7 @@ namespace LcMatrix {
                         return result;
                 }
 
-                Matrix x(row, col);
+                auto pre_x_end = std::end(pre_x.matrix);
 
                 // numpyのブロードキャストみたいなやつ
                 // 行数同じで列が1つ
@@ -509,7 +517,6 @@ namespace LcMatrix {
                 auto ite = std::begin(matrix);
                 auto end = std::end(matrix);
                 auto pre_x_ite = std::begin(pre_x.matrix);
-                auto pre_x_end = std::end(pre_x.matrix);
 
                 // 行と列が同数のとき
                 if (row == pre_x.row && col == pre_x.col) {
@@ -519,7 +526,7 @@ namespace LcMatrix {
                         return result;
                 }
 
-                Matrix x(row, col);
+                auto pre_x_end = std::end(pre_x.matrix);
 
                 // numpyのブロードキャストみたいなやつ
                 // 行数同じで列が1つ
@@ -560,7 +567,48 @@ namespace LcMatrix {
         }
 
         /*
+         * matrixとpre_xの各要素を比較して,
+         * 等しければ1, そうでなければ0の行列を返す関数
+         */
+        Matrix Matrix::operator == (const Matrix &pre_x) const {
+                Matrix result(row, col);
+
+                auto ite = std::begin(matrix);
+                auto end = std::end(matrix);
+                auto pre_x_ite = std::begin(pre_x.matrix);
+
+                // 行と列が同数のとき
+                for (; ite != end; ite++, pre_x_ite++) {
+                        if (*ite == *pre_x_ite)
+                                result.matrix.push_back(1);
+                        else 
+                                result.matrix.push_back(0);
+                }
+
+                return result;
+        }
+
+        /*
          * matrixとxの各要素を比較して,
+         * 等しければ1, そうでなければ0の行列を返す関数
+         */
+        Matrix Matrix::operator == (const double x) const {
+                Matrix result(row, col);
+
+                // 行と列が同数のとき
+                for (double i : matrix) {
+                        if (i == x)
+                                result.matrix.push_back(1);
+                        else 
+                                result.matrix.push_back(0);
+                }
+
+                return result;
+        }
+
+
+        /*
+         * matrixとpre_xの各要素を比較して,
          * x以下なら1, それ以外は0の行列を返す関数
          */
         Matrix Matrix::operator <= (const Matrix &pre_x) const {
@@ -587,9 +635,6 @@ namespace LcMatrix {
          */
         Matrix Matrix::operator <= (const double x) const {
                 Matrix result(row, col);
-
-                auto ite = std::begin(matrix);
-                auto end = std::end(matrix);
 
                 // 行と列が同数のとき
                 for (double i : matrix) {
