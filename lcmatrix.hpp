@@ -20,6 +20,7 @@ namespace LcMatrix {
                 Matrix(std::vector<std::vector<double>>);
                 Matrix(int, int);
                 Matrix(int, int, double x);
+                void initVec(int, int, std::vector<double>&);
                 void initRand();
                 double get(int, int);
                 void set(int, int, double);

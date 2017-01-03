@@ -15,21 +15,6 @@
  */
 namespace LcMatrix {
         /*
-         * matrixを正規分布で初期化する
-         */
-        void Matrix::initRand() {
-                std::random_device rnd;
-                std::mt19937_64 mt(rnd());
-                // 平均0.0, 分散値1.0の正規分布
-                std::normal_distribution<> norm(0.0, 1.0);
-
-                matrix.clear();
-                for (int i = 0; i < size; i++) {
-                        matrix.push_back(norm(mt));
-                }
-        }
-
-        /*
          * 宣言だけするとき
          */
         Matrix::Matrix() {
@@ -69,6 +54,31 @@ namespace LcMatrix {
                 row = i;
                 col = j;
                 size = row * col;
+        }
+
+        /*
+         * matrixをstd::vector<double>で初期化する
+         */
+        void Matrix::initVec(int row, int col, std::vector<double> &v) {
+                this->row = row;
+                this->col = col;
+                size = row * col;
+                matrix = v;
+        }
+
+        /*
+         * matrixを正規分布で初期化する
+         */
+        void Matrix::initRand() {
+                std::random_device rnd;
+                std::mt19937_64 mt(rnd());
+                // 平均0.0, 分散値1.0の正規分布
+                std::normal_distribution<> norm(0.0, 1.0);
+
+                matrix.clear();
+                for (int i = 0; i < size; i++) {
+                        matrix.push_back(norm(mt));
+                }
         }
 
         /*
@@ -343,21 +353,24 @@ namespace LcMatrix {
                 // 行数同じで列が1つ
                 auto pre_x_ite_str = pre_x_ite;
                 if (row == pre_x.row && pre_x.col == 1) {
-                        for (; ite != end; ite++, pre_x_ite++) {
-                                if (pre_x_ite == pre_x_end - 1)
-                                        pre_x_ite = pre_x_ite_str;
+                        int count = 0;
+                        for (; ite != end; ite++, count++) {
+                                if (count == col) {
+                                        pre_x_ite++;
+                                        count = 0;
+                                }
+
                                 result.matrix.push_back(*ite * *pre_x_ite);
                         }
                 }
                 // 列数同じで行が1つ
                 if (col == pre_x.col && pre_x.row == 1) {
-                        int count = 0;
-                        for (; ite != end; ite++, count++) {
-                                if (count == row - 1) {
-                                        pre_x_ite++;
-                                        count = 0;
-                                }
+                        for (; ite != end; ite++) {
                                 result.matrix.push_back(*ite * *pre_x_ite);
+
+                                if (pre_x_ite == pre_x_end) {
+                                        pre_x_ite = pre_x_ite_str;
+                                }
                         }
                 }
 
@@ -412,21 +425,24 @@ namespace LcMatrix {
                 // 行数同じで列が1つ
                 auto pre_x_ite_str = pre_x_ite;
                 if (row == pre_x.row && pre_x.col == 1) {
-                        for (; ite != end; ite++, pre_x_ite++) {
-                                if (pre_x_ite == pre_x_end - 1)
-                                        pre_x_ite = pre_x_ite_str;
+                        int count = 0;
+                        for (; ite != end; ite++, count++) {
+                                if (count == col) {
+                                        pre_x_ite++;
+                                        count = 0;
+                                }
+
                                 result.matrix.push_back(*ite + *pre_x_ite);
                         }
                 }
                 // 列数同じで行が1つ
                 if (col == pre_x.col && pre_x.row == 1) {
-                        int count = 0;
-                        for (; ite != end; ite++, count++) {
-                                if (count == row - 1) {
-                                        pre_x_ite++;
-                                        count = 0;
-                                }
+                        for (; ite != end; ite++) {
                                 result.matrix.push_back(*ite + *pre_x_ite);
+
+                                if (pre_x_ite == pre_x_end) {
+                                        pre_x_ite = pre_x_ite_str;
+                                }
                         }
                 }
 
@@ -470,21 +486,24 @@ namespace LcMatrix {
                 // 行数同じで列が1つ
                 auto pre_x_ite_str = pre_x_ite;
                 if (row == pre_x.row && pre_x.col == 1) {
-                        for (; ite != end; ite++, pre_x_ite++) {
-                                if (pre_x_ite == pre_x_end - 1)
-                                        pre_x_ite = pre_x_ite_str;
+                        int count = 0;
+                        for (; ite != end; ite++, count++) {
+                                if (count == col) {
+                                        pre_x_ite++;
+                                        count = 0;
+                                }
+
                                 result.matrix.push_back(*ite - *pre_x_ite);
                         }
                 }
                 // 列数同じで行が1つ
                 if (col == pre_x.col && pre_x.row == 1) {
-                        int count = 0;
-                        for (; ite != end; ite++, count++) {
-                                if (count == row - 1) {
-                                        pre_x_ite++;
-                                        count = 0;
-                                }
+                        for (; ite != end; ite++) {
                                 result.matrix.push_back(*ite - *pre_x_ite);
+
+                                if (pre_x_ite == pre_x_end) {
+                                        pre_x_ite = pre_x_ite_str;
+                                }
                         }
                 }
 
@@ -541,21 +560,24 @@ namespace LcMatrix {
                 // 行数同じで列が1つ
                 auto pre_x_ite_str = pre_x_ite;
                 if (row == pre_x.row && pre_x.col == 1) {
-                        for (; ite != end; ite++, pre_x_ite++) {
-                                if (pre_x_ite == pre_x_end - 1)
-                                        pre_x_ite = pre_x_ite_str;
+                        int count = 0;
+                        for (; ite != end; ite++, count++) {
+                                if (count == col) {
+                                        pre_x_ite++;
+                                        count = 0;
+                                }
+
                                 result.matrix.push_back(*ite / *pre_x_ite);
                         }
                 }
                 // 列数同じで行が1つ
                 if (col == pre_x.col && pre_x.row == 1) {
-                        int count = 0;
-                        for (; ite != end; ite++, count++) {
-                                if (count == row - 1) {
-                                        pre_x_ite++;
-                                        count = 0;
-                                }
+                        for (; ite != end; ite++) {
                                 result.matrix.push_back(*ite / *pre_x_ite);
+
+                                if (pre_x_ite == pre_x_end) {
+                                        pre_x_ite = pre_x_ite_str;
+                                }
                         }
                 }
 
