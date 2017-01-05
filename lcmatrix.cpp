@@ -153,7 +153,7 @@ namespace LcMatrix {
                         auto r_ite_st = r_ite; // r_iteをとっとく
 
                         for (; ite != end; ite++, r_ite++) {
-                                if (r_ite == r_end - 1)
+                                if (r_ite == r_end)
                                         r_ite = r_ite_st;
 
                                 if (*r_ite < *ite)
@@ -362,15 +362,20 @@ namespace LcMatrix {
 
                                 result.matrix.push_back(*ite * *pre_x_ite);
                         }
+
+                        return result;
                 }
                 // 列数同じで行が1つ
                 if (col == pre_x.col && pre_x.row == 1) {
-                        for (; ite != end; ite++) {
-                                result.matrix.push_back(*ite * *pre_x_ite);
-
-                                if (pre_x_ite == pre_x_end) {
+                        int count = 0;
+                        for (; ite != end; ite++, count++) {
+                                if (count == col) {
                                         pre_x_ite = pre_x_ite_str;
+                                        count = 0;
                                 }
+
+                                result.matrix.push_back(*ite * *pre_x_ite);
+                                pre_x_ite++;
                         }
                 }
 
@@ -434,15 +439,20 @@ namespace LcMatrix {
 
                                 result.matrix.push_back(*ite + *pre_x_ite);
                         }
+
+                        return result;
                 }
                 // 列数同じで行が1つ
                 if (col == pre_x.col && pre_x.row == 1) {
-                        for (; ite != end; ite++) {
-                                result.matrix.push_back(*ite + *pre_x_ite);
-
-                                if (pre_x_ite == pre_x_end) {
+                        int count = 0;
+                        for (; ite != end; ite++, count++) {
+                                if (count == col) {
                                         pre_x_ite = pre_x_ite_str;
+                                        count = 0;
                                 }
+
+                                result.matrix.push_back(*ite + *pre_x_ite);
+                                pre_x_ite++;
                         }
                 }
 
@@ -495,15 +505,20 @@ namespace LcMatrix {
 
                                 result.matrix.push_back(*ite - *pre_x_ite);
                         }
+
+                        return result;
                 }
                 // 列数同じで行が1つ
                 if (col == pre_x.col && pre_x.row == 1) {
-                        for (; ite != end; ite++) {
-                                result.matrix.push_back(*ite - *pre_x_ite);
-
-                                if (pre_x_ite == pre_x_end) {
+                        int count = 0;
+                        for (; ite != end; ite++, count++) {
+                                if (count == col) {
                                         pre_x_ite = pre_x_ite_str;
+                                        count = 0;
                                 }
+
+                                result.matrix.push_back(*ite - *pre_x_ite);
+                                pre_x_ite++;
                         }
                 }
 
@@ -569,15 +584,20 @@ namespace LcMatrix {
 
                                 result.matrix.push_back(*ite / *pre_x_ite);
                         }
+
+                        return result;
                 }
                 // 列数同じで行が1つ
                 if (col == pre_x.col && pre_x.row == 1) {
-                        for (; ite != end; ite++) {
-                                result.matrix.push_back(*ite / *pre_x_ite);
-
-                                if (pre_x_ite == pre_x_end) {
+                        int count = 0;
+                        for (; ite != end; ite++, count++) {
+                                if (count == col) {
                                         pre_x_ite = pre_x_ite_str;
+                                        count = 0;
                                 }
+
+                                result.matrix.push_back(*ite / *pre_x_ite);
+                                pre_x_ite++;
                         }
                 }
 
